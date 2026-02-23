@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complexion Studio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ivory: #F8F4EF;
+      --warm-white: #FDF9F5;
+      --charcoal: #1C1C1E;
+      --espresso: #2D1F1A;
+      --blush: #D4967A;
+      --blush-light: #E8C4B0;
+      --terracotta: #B5633A;
+      --sage: #8A9E8C;
+      --gold: #C9A96E;
+      --gold-light: #E8D5B0;
+      --text-muted: #8A7F78;
+      --border: rgba(180,150,130,0.2);
+      --card-bg: rgba(255,252,248,0.95);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--ivory);
+      color: var(--charcoal);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* NOISE TEXTURE OVERLAY */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    /* ─── DECORATIVE CIRCLES ─── */
+    .deco-circle {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .deco-circle-1 {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(212,150,122,0.12) 0%, transparent 70%);
+      top: -200px; right: -200px;
+    }
+    .deco-circle-2 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(138,158,140,0.1) 0%, transparent 70%);
+      bottom: -100px; left: -100px;
+    }
+
+    /* ─── LAYOUT ─── */
+    .app-wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    /* ─── HEADER ─── */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 60px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .brand-eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--blush);
+      font-weight: 500;
+    }
+
+    .brand-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.4em;
+      color: var(--espresso);
+      line-height: 1.1;
+    }
+
+    .brand-name em {
+      color: var(--blush);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 8px;
+    }
+
+    .btn-ghost {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 8px 20px;
+      border-radius: 40px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85em;
+      font-weight: 400;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      letter-spacing: 0.04em;
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--blush);
+      color: var(--blush);
+      background: rgba(212,150,122,0.06);
+    }
+
+    /* ─── LOGIN SCREEN ─── */
+    #loginScreen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      min-height: 60vh;
+      justify-content: center;
+    }
+
+    .login-wrapper {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .login-headline {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.6em;
+      color: var(--espresso);
+      text-align: center;
+      margin-bottom: 10px;
+      line-height: 1.2;
+    }
+
+    .login-sub {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.95em;
+      margin-bottom: 40px;
+      line-height: 1.6;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .field-label {
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .field-input {
+      width: 100%;
+      padding: 14px 18px;
+      background: var(--warm-white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95em;
+      color: var(--charcoal);
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    .field-input::placeholder { color: #C4B8B0; }
+
+    .field-input:focus {
+      border-color: var(--blush);
+      box-shadow: 0 0 0 3px rgba(212,150,122,0.12);
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 16px;
+      background: var(--espresso);
+      color: var(--ivory);
+      border: none;
+      border-radius: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95em;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .btn-primary:hover {
+      background: var(--terracotta);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(181,99,58,0.25);
+    }
+
+    .demo-tag {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 0.8em;
+      color: var(--text-muted);
+    }
+
+    .demo-tag span {
+      background: var(--gold-light);
+      padding: 4px 12px;
+      border-radius: 20px;
+      color: var(--terracotta);
+      font-weight: 500;
+    }
+
+    /* ─── MAIN APP ─── */
+    #mainApp { display: none; }
+
+    /* UPLOAD ZONE */
+    .upload-zone {
+      position: relative;
+      border: 1.5px dashed var(--blush-light);
+      border-radius: 24px;
+      padding: 60px 40px;
+      text-align: center;
+      background: var(--warm-white);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      margin-bottom: 32px;
+      overflow: hidden;
+    }
+
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--blush);
+      background: rgba(212,150,122,0.04);
+    }
+
+    .upload-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 24px;
+      background: linear-gradient(135deg, var(--blush-light), var(--gold-light));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2em;
+    }
+
+    .upload-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5em;
+      color: var(--espresso);
+      margin-bottom: 8px;
+    }
+
+    .upload-sub {
+      color: var(--text-muted);
+      font-size: 0.9em;
+      margin-bottom: 28px;
+    }
+
+    .upload-actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-upload {
+      padding: 12px 28px;
+      border-radius: 40px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9em;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      letter-spacing: 0.04em;
+    }
+
+    .btn-file {
+      background: var(--espresso);
+      color: var(--ivory);
+      border: none;
+    }
+
+    .btn-file:hover {
+      background: var(--terracotta);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(181,99,58,0.25);
+    }
+
+    .btn-camera {
+      background: none;
+      border: 1px solid var(--espresso);
+      color: var(--espresso);
+    }
+
+    .btn-camera:hover {
+      background: var(--espresso);
+      color: var(--ivory);
+    }
+
+    #imageUpload { display: none; }
+
+    /* PREVIEW */
+    #previewSection { display: none; margin-bottom: 32px; }
+
+    .preview-frame {
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(45,31,26,0.12);
+      background: var(--charcoal);
+    }
+
+    #imageCanvas { display: block; max-width: 100%; height: auto; }
+
+    .preview-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .sample-ring {
+      width: 40%;
+      aspect-ratio: 1;
+      border: 2px dashed rgba(255,255,255,0.5);
+      border-radius: 50%;
+      box-shadow: 0 0 0 2000px rgba(0,0,0,0.15);
+    }
+
+    .sample-label {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.55);
+      color: white;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.78em;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+      backdrop-filter: blur(4px);
+    }
+
+    .preview-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .btn-analyze {
+      flex: 1;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--blush) 0%, var(--terracotta) 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1em;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      letter-spacing: 0.04em;
+    }
+
+    .btn-analyze:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(181,99,58,0.3);
+    }
+
+    .btn-reset {
+      padding: 16px 24px;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9em;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-reset:hover {
+      border-color: var(--charcoal);
+      color: var(--charcoal);
+    }
+
+    /* ─── RESULTS ─── */
+    #resultsSection { display: none; }
+
+    .results-header {
+      text-align: center;
+      margin-bottom: 48px;
+      padding-top: 16px;
+    }
+
+    .results-header .eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--blush);
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .results-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.2em;
+      color: var(--espresso);
+    }
+
+    /* SKIN COLOR HERO CARD */
+    .color-hero {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 32px;
+      align-items: center;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 32px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 20px rgba(45,31,26,0.06);
+    }
+
+    .color-swatch-hero {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+      flex-shrink: 0;
+      border: 4px solid white;
+    }
+
+    .color-hero-info h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3em;
+      color: var(--espresso);
+      margin-bottom: 16px;
+    }
+
+    .color-values {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .cv-row {
+      display: flex;
+      gap: 8px;
+      align-items: baseline;
+    }
+
+    .cv-label {
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 500;
+      min-width: 36px;
+    }
+
+    .cv-value {
+      font-size: 0.9em;
+      color: var(--charcoal);
+      font-weight: 400;
+    }
+
+    /* METRIC CARDS GRID */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .metric-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px 20px;
+      box-shadow: 0 4px 20px rgba(45,31,26,0.06);
+      transition: transform 0.2s ease;
+    }
+
+    .metric-card:hover { transform: translateY(-2px); }
+
+    .metric-eyebrow {
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--blush);
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+
+    .metric-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 2em;
+      color: var(--espresso);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .metric-label {
+      font-size: 0.85em;
+      color: var(--text-muted);
+    }
+
+    .metric-desc {
+      font-size: 0.8em;
+      color: var(--text-muted);
+      margin-top: 10px;
+      line-height: 1.5;
+    }
+
+    /* ITA BAR */
+    .ita-track {
+      height: 6px;
+      background: linear-gradient(to right, #1a0a00, #c8956c, #f5dcc8, #faf4ee);
+      border-radius: 3px;
+      position: relative;
+      margin-top: 14px;
+    }
+
+    .ita-thumb {
+      width: 14px; height: 14px;
+      background: var(--espresso);
+      border: 2px solid white;
+      border-radius: 50%;
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      transition: left 0.4s ease;
+    }
+
+    /* MONK SCALE */
+    .monk-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .monk-pip {
+      flex: 1;
+      min-width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      border: 2px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    .monk-pip.active {
+      border-color: var(--espresso);
+      transform: scale(1.25);
+      box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+    }
+
+    /* ─── UNDERTONE & COLOR RECS ─── */
+    .section-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 32px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 20px rgba(45,31,26,0.06);
+    }
+
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4em;
+      color: var(--espresso);
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .undertone-pill {
+      display: inline-block;
+      padding: 6px 18px;
+      border-radius: 30px;
+      font-size: 0.85em;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+    }
+
+    .undertone-warm { background: linear-gradient(135deg, #F5CBA7, #E59866); color: #5D2F0A; }
+    .undertone-cool { background: linear-gradient(135deg, #AED6F1, #85C1E9); color: #0D3C55; }
+    .undertone-neutral { background: linear-gradient(135deg, #D5DBDB, #A9CCE3); color: #2C3E50; }
+
+    .undertone-desc {
+      color: var(--text-muted);
+      font-size: 0.9em;
+      margin: 12px 0 28px;
+      line-height: 1.7;
+    }
+
+    .palette-label {
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-bottom: 14px;
+    }
+
+    .palette-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+
+    .swatch-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .swatch-dot {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      transition: transform 0.2s ease;
+      cursor: default;
+    }
+
+    .swatch-dot:hover { transform: scale(1.15); box-shadow: 0 6px 18px rgba(0,0,0,0.18); }
+
+    .swatch-name {
+      font-size: 0.72em;
+      color: var(--text-muted);
+      text-align: center;
+      max-width: 52px;
+      line-height: 1.3;
+    }
+
+    /* TIPS */
+    .tips-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 20px;
+      border-top: 1px solid var(--border);
+      padding-top: 20px;
+    }
+
+    .tips-list li {
+      display: flex;
+      gap: 10px;
+      font-size: 0.9em;
+      color: #5A4A43;
+      line-height: 1.6;
+    }
+
+    .tips-list li::before {
+      content: '—';
+      color: var(--blush);
+      flex-shrink: 0;
+      font-weight: 500;
+    }
+
+    /* ─── SHOPPING ─── */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .product-item {
+      background: var(--warm-white);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 16px;
+      text-align: center;
+      transition: all 0.25s ease;
+    }
+
+    .product-item:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(45,31,26,0.1);
+      border-color: var(--blush-light);
+    }
+
+    .product-emoji { font-size: 2.2em; margin-bottom: 10px; }
+
+    .product-name {
+      font-weight: 500;
+      font-size: 0.9em;
+      color: var(--espresso);
+      margin-bottom: 6px;
+    }
+
+    .product-desc {
+      font-size: 0.78em;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+
+    .btn-buy {
+      display: inline-block;
+      padding: 7px 16px;
+      background: var(--espresso);
+      color: var(--ivory);
+      border-radius: 20px;
+      font-size: 0.78em;
+      font-weight: 500;
+      text-decoration: none;
+      letter-spacing: 0.04em;
+      transition: all 0.2s;
+    }
+
+    .btn-buy:hover { background: var(--terracotta); }
+
+    /* ABOUT CARD */
+    .about-card {
+      background: var(--espresso);
+      border-radius: 24px;
+      padding: 32px;
+      color: rgba(248,244,239,0.7);
+      margin-bottom: 20px;
+    }
+
+    .about-card .section-title { color: var(--gold-light); }
+
+    .about-items {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 4px;
+    }
+
+    .about-item strong {
+      display: block;
+      color: var(--ivory);
+      font-weight: 500;
+      margin-bottom: 4px;
+      font-size: 0.9em;
+    }
+
+    .about-item { font-size: 0.85em; line-height: 1.6; }
+
+    /* DIVIDER */
+    .section-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 40px 0;
+    }
+
+    /* ANIMATION */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .anim-fade { animation: fadeUp 0.5s ease forwards; }
+
+    .card-delay-1 { animation-delay: 0.05s; opacity: 0; }
+    .card-delay-2 { animation-delay: 0.1s; opacity: 0; }
+    .card-delay-3 { animation-delay: 0.15s; opacity: 0; }
+    .card-delay-4 { animation-delay: 0.2s; opacity: 0; }
+    .card-delay-5 { animation-delay: 0.25s; opacity: 0; }
+
+    /* RESPONSIVE */
+    @media (max-width: 640px) {
+      .metrics-grid { grid-template-columns: 1fr 1fr; }
+      .color-hero { grid-template-columns: 1fr; text-align: center; }
+      .color-swatch-hero { margin: 0 auto; }
+      .brand-name { font-size: 1.8em; }
+    }
+  </style>
+</head>
+<body>
+  <div class="deco-circle deco-circle-1"></div>
+  <div class="deco-circle deco-circle-2"></div>
+
+  <div class="app-wrapper">
+    <header>
+      <div class="brand">
+        <span class="brand-eyebrow">Skin Analysis</span>
+        <h1 class="brand-name">Complexion <em>Studio</em></h1>
+      </div>
+      <div class="header-actions">
+        <button class="btn-ghost" id="logoutBtn" style="display:none">Sign out</button>
+      </div>
+    </header>
+
+    <!-- LOGIN -->
+    <div id="loginScreen">
+      <div class="login-wrapper">
+        <h2 class="login-headline">Welcome back</h2>
+        <p class="login-sub">Sign in to access your personalized<br>skin tone analysis and color consultation.</p>
+        <div class="field-group">
+          <div>
+            <div class="field-label">Username</div>
+            <div class="input-wrap">
+              <input class="field-input" type="text" id="username" placeholder="Any username">
+            </div>
+          </div>
+          <div>
+            <div class="field-label">Password</div>
+            <div class="input-wrap">
+              <input class="field-input" type="password" id="password" placeholder="Any password">
+            </div>
+          </div>
+        </div>
+        <button class="btn-primary" id="loginBtn">Sign In</button>
+        <p class="demo-tag">Demo mode — <span>any credentials work</span></p>
+      </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="mainApp">
+      <!-- Upload -->
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="imageUpload" accept="image/*">
+        <div class="upload-icon">🎨</div>
+        <h3 class="upload-title">Upload a photo</h3>
+        <p class="upload-sub">We'll analyze the skin tone from the center of your image</p>
+        <div class="upload-actions">
+          <button class="btn-upload btn-file" onclick="document.getElementById('imageUpload').click()">Choose File</button>
+          <button class="btn-upload btn-camera" id="cameraBtn">Use Camera</button>
+        </div>
+      </div>
+
+      <!-- Preview -->
+      <div id="previewSection">
+        <div class="preview-frame">
+          <canvas id="imageCanvas"></canvas>
+          <div class="preview-overlay">
+            <div class="sample-ring"></div>
+          </div>
+          <div class="sample-label">Sampling area</div>
+        </div>
+        <div class="preview-actions">
+          <button class="btn-analyze" id="analyzeBtn">Analyze Skin Tone</button>
+          <button class="btn-reset" id="resetBtn">Reset</button>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div id="resultsSection">
+        <div class="results-header">
+          <div class="eyebrow">Your Analysis</div>
+          <h2>Skin Tone Report</h2>
+        </div>
+
+        <!-- Color hero -->
+        <div class="color-hero anim-fade card-delay-1">
+          <div class="color-swatch-hero" id="colorSwatchHero"></div>
+          <div class="color-hero-info">
+            <h3>Dominant Skin Color</h3>
+            <div class="color-values">
+              <div class="cv-row"><span class="cv-label">RGB</span><span class="cv-value" id="rgbValue">—</span></div>
+              <div class="cv-row"><span class="cv-label">HSV</span><span class="cv-value" id="hsvValue">—</span></div>
+              <div class="cv-row"><span class="cv-label">LAB</span><span class="cv-value" id="labValue">—</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metrics grid -->
+        <div class="metrics-grid">
+          <!-- ITA -->
+          <div class="metric-card anim-fade card-delay-2">
+            <div class="metric-eyebrow">ITA Score</div>
+            <div class="metric-value" id="itaValue">—</div>
+            <div class="metric-label" id="itaCategory">—</div>
+            <div class="ita-track">
+              <div class="ita-thumb" id="itaThumb" style="left:50%"></div>
+            </div>
+          </div>
+          <!-- Fitzpatrick -->
+          <div class="metric-card anim-fade card-delay-3">
+            <div class="metric-eyebrow">Fitzpatrick</div>
+            <div class="metric-value" id="fitzType">—</div>
+            <div class="metric-label" id="fitzDesc">—</div>
+          </div>
+          <!-- Monk -->
+          <div class="metric-card anim-fade card-delay-4">
+            <div class="metric-eyebrow">Monk Scale</div>
+            <div class="metric-value" id="monkType">—</div>
+            <div class="metric-label">10-level modern scale</div>
+            <div class="monk-row" id="monkRow"></div>
+          </div>
+        </div>
+
+        <!-- Color Recommendations -->
+        <div class="section-card anim-fade card-delay-5">
+          <div class="section-title">✦ Color Consultation</div>
+          <div id="undertoneBlock">
+            <span class="undertone-pill" id="undertonePill">—</span>
+            <p class="undertone-desc" id="undertoneDesc">—</p>
+          </div>
+
+          <div class="palette-label">Clothing Colors</div>
+          <div class="palette-row" id="clothingPalette"></div>
+
+          <div class="palette-label">Makeup Shades</div>
+          <div class="palette-row" id="makeupPalette"></div>
+
+          <div class="palette-label">Jewelry & Accessories</div>
+          <div class="palette-row" id="accessoryPalette"></div>
+
+          <ul class="tips-list" id="tipsList"></ul>
+        </div>
+
+        <!-- Shopping -->
+        <div class="section-card anim-fade card-delay-5">
+          <div class="section-title">🛍 Shop Recommendations</div>
+          <div class="product-grid" id="sunscreenGrid"></div>
+          <div class="product-grid" id="clothingGrid"></div>
+          <p style="font-size:0.78em;color:var(--text-muted);text-align:center;margin-top:8px">* Sample affiliate links for demonstration</p>
+        </div>
+
+        <!-- About -->
+        <div class="about-card anim-fade card-delay-5">
+          <div class="section-title">ℹ About This Analysis</div>
+          <div class="about-items">
+            <div class="about-item"><strong>ITA</strong>Objective measurement using the LAB color space — values range from light to dark.</div>
+            <div class="about-item"><strong>Fitzpatrick Scale</strong>Traditional 6-type dermatological classification, commonly used for UV sensitivity.</div>
+            <div class="about-item"><strong>Monk Scale</strong>A modern, inclusive 10-tone framework developed at Harvard for broader representation.</div>
+            <div class="about-item"><strong>Note</strong>This is a simplified image analysis. Professional assessment is recommended for clinical use.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    // ─── DATA ───
+    const monkColors = ["#f6ede4","#f3e7db","#f7ead0","#eadaba","#d7bd96","#a07e56","#825c43","#604134","#3a312a","#292420"];
+
+    const colorDB = {
+      warm_light:    { undertone:"Warm", cls:"undertone-warm", desc:"Peachy, golden undertones with a light complexion — warm hues bring out your natural radiance.", clothing:[{c:"#FF6B6B",n:"Coral"},{c:"#FFB84D",n:"Peach"},{c:"#C19A6B",n:"Camel"},{c:"#8B4513",n:"Warm Brown"},{c:"#FF7F50",n:"Orange"},{c:"#F4A460",n:"Tan"}], makeup:[{c:"#E89B7A",n:"Warm Beige"},{c:"#D4876F",n:"Peachy Pink"},{c:"#C47B63",n:"Terracotta"},{c:"#E8B298",n:"Nude Peach"}], accessories:[{c:"#FFD700",n:"Gold"},{c:"#CD7F32",n:"Bronze"},{c:"#B87333",n:"Copper"}], tips:["Gold jewellery enhances your warm glow beautifully","Earth tones — terracotta, rust, warm browns — are your power palette","Peach and coral blushes bring out your natural warmth","Ivory and cream suit you better than stark white","Avoid icy or blue-toned colours; stay in the warm family"] },
+      warm_medium:   { undertone:"Warm", cls:"undertone-warm", desc:"Golden, sun-kissed undertones with a medium complexion — rich earth tones make your skin glow.", clothing:[{c:"#8B4513",n:"Rich Brown"},{c:"#DAA520",n:"Goldenrod"},{c:"#CD853F",n:"Peru"},{c:"#D2691E",n:"Chocolate"},{c:"#FF6347",n:"Tomato Red"},{c:"#228B22",n:"Forest Green"}], makeup:[{c:"#B8734E",n:"Warm Bronze"},{c:"#A0653A",n:"Cinnamon"},{c:"#D4966A",n:"Golden Nude"},{c:"#8B5A3C",n:"Burnt Sienna"}], accessories:[{c:"#FFD700",n:"Gold"},{c:"#CD7F32",n:"Bronze"},{c:"#B8860B",n:"Dark Gold"}], tips:["Gold jewellery complements your golden undertones perfectly","Warm reds, oranges, and yellows are your statement colours","Rich earth tones enhance your natural depth","Olive green and burnt orange are excellent neutrals","Bronze and copper metallics create a radiant glow"] },
+      warm_deep:     { undertone:"Warm", cls:"undertone-warm", desc:"Rich, warm undertones with a deep complexion — bold and saturated tones celebrate your depth.", clothing:[{c:"#8B0000",n:"Deep Red"},{c:"#FF8C00",n:"Dark Orange"},{c:"#B8860B",n:"Dark Gold"},{c:"#228B22",n:"Forest Green"},{c:"#8B4513",n:"Saddle Brown"},{c:"#800020",n:"Burgundy"}], makeup:[{c:"#8B4726",n:"Rich Bronze"},{c:"#704214",n:"Deep Copper"},{c:"#C04000",n:"Mahogany"},{c:"#5C3317",n:"Bittersweet"}], accessories:[{c:"#FFD700",n:"Gold"},{c:"#CD7F32",n:"Bronze"},{c:"#B8860B",n:"Dark Gold"}], tips:["Gold and bronze jewellery illuminate your rich complexion","Bold warm colours like burgundy and burnt orange are stunning","Rich jewel tones complement your depth beautifully","Warm metallics in makeup create a gorgeous glow","Deep earth tones honour your natural beauty"] },
+      cool_light:    { undertone:"Cool", cls:"undertone-cool", desc:"Pink or rosy undertones with a light complexion — cool, clear hues make your skin luminous.", clothing:[{c:"#FF69B4",n:"Hot Pink"},{c:"#9370DB",n:"Purple"},{c:"#4169E1",n:"Royal Blue"},{c:"#DC143C",n:"Crimson"},{c:"#C0C0C0",n:"Silver"},{c:"#2F4F4F",n:"Charcoal"}], makeup:[{c:"#FFB6C1",n:"Light Pink"},{c:"#DDA0DD",n:"Plum"},{c:"#F4C2C2",n:"Rose"},{c:"#E6B8E6",n:"Mauve"}], accessories:[{c:"#C0C0C0",n:"Silver"},{c:"#E5E4E2",n:"Platinum"},{c:"#FFFFFF",n:"White Gold"}], tips:["Silver jewellery enhances your cool undertones effortlessly","Cool pinks, purples, and blues are your best friends","True white and crisp black work beautifully on you","Rose and berry tones create a fresh, clean look","Avoid warm yellows and oranges — keep it cool"] },
+      cool_medium:   { undertone:"Cool", cls:"undertone-cool", desc:"Blue-pink undertones with a medium complexion — jewel tones and cool hues make you shine.", clothing:[{c:"#4B0082",n:"Indigo"},{c:"#8B008B",n:"Dark Magenta"},{c:"#00CED1",n:"Turquoise"},{c:"#DC143C",n:"Crimson"},{c:"#708090",n:"Slate Gray"},{c:"#191970",n:"Navy"}], makeup:[{c:"#C08497",n:"Dusty Rose"},{c:"#915F6D",n:"Mauve"},{c:"#B565A7",n:"Orchid"},{c:"#AA5B7D",n:"Berry"}], accessories:[{c:"#C0C0C0",n:"Silver"},{c:"#E5E4E2",n:"Platinum"},{c:"#B4C7D6",n:"Cool Gray"}], tips:["Silver and platinum jewellery complement your cool tones","Jewel tones — sapphire, emerald, ruby — are stunning on you","Cool reds and pinks enhance your natural colouring","Berry and plum shades are perfect for makeup","Navy and charcoal are excellent neutral anchors"] },
+      cool_deep:     { undertone:"Cool", cls:"undertone-cool", desc:"Cool undertones with a deep, rich complexion — bold jewel tones and crisp contrasts are your power moves.", clothing:[{c:"#8B008B",n:"Dark Magenta"},{c:"#4B0082",n:"Indigo"},{c:"#00BFFF",n:"Deep Sky Blue"},{c:"#8B0000",n:"Dark Red"},{c:"#000080",n:"Navy"},{c:"#4B0150",n:"Deep Purple"}], makeup:[{c:"#722F37",n:"Wine"},{c:"#702963",n:"Plum"},{c:"#8B4789",n:"Deep Orchid"},{c:"#5C2E3B",n:"Burgundy"}], accessories:[{c:"#C0C0C0",n:"Silver"},{c:"#E5E4E2",n:"Platinum"},{c:"#FFFFFF",n:"White Gold"}], tips:["Silver jewellery creates a striking, elegant contrast","Bold jewel tones are incredibly flattering on you","Deep purples, blues, and reds enhance your richness","Wine and plum lip colours are show-stopping","Bright white and true black are power colours for you"] },
+      neutral_light: { undertone:"Neutral", cls:"undertone-neutral", desc:"Balanced undertones with a light complexion — your versatile colouring suits nearly any palette.", clothing:[{c:"#E6BE8A",n:"Soft Peach"},{c:"#B19CD9",n:"Lavender"},{c:"#87CEEB",n:"Sky Blue"},{c:"#DDA0DD",n:"Plum"},{c:"#D3D3D3",n:"Light Gray"},{c:"#F5DEB3",n:"Wheat"}], makeup:[{c:"#E8B5A3",n:"Neutral Nude"},{c:"#C9A0A0",n:"Rosy Nude"},{c:"#D8B2B2",n:"Soft Pink"},{c:"#B89B8B",n:"Taupe"}], accessories:[{c:"#FFD700",n:"Gold"},{c:"#C0C0C0",n:"Silver"},{c:"#E5AA70",n:"Rose Gold"}], tips:["You can wear both gold and silver jewellery — lucky you!","Most colour families work; you have beautifully versatile colouring","Soft pastels and muted tones are particularly flattering","Experiment freely — warm and cool shades both suit you","Rose gold is an especially flattering metal for neutral undertones"] },
+      neutral_medium:{ undertone:"Neutral", cls:"undertone-neutral", desc:"Balanced undertones with a medium complexion — explore the full spectrum with confidence.", clothing:[{c:"#CD853F",n:"Peru"},{c:"#9370DB",n:"Medium Purple"},{c:"#20B2AA",n:"Light Sea Green"},{c:"#BC8F8F",n:"Rosy Brown"},{c:"#778899",n:"Light Slate"},{c:"#A0522D",n:"Sienna"}], makeup:[{c:"#A87D5F",n:"Neutral Tan"},{c:"#977869",n:"Taupe"},{c:"#C8997A",n:"Balanced Nude"},{c:"#8B6F5E",n:"Neutral Brown"}], accessories:[{c:"#FFD700",n:"Gold"},{c:"#C0C0C0",n:"Silver"},{c:"#E5AA70",n:"Rose Gold"}], tips:["Mixed metals look incredible on you — stack away","You can pull off both warm and cool colours with ease","Dusty and muted tones are particularly flattering","Olive, teal, and mauve are signature flattering hues","Try blending warm and cool shades in the same outfit"] },
+      neutral_deep:  { undertone:"Neutral", cls:"undertone-neutral", desc:"Balanced undertones with a deep, rich complexion — you have extraordinary range across the colour spectrum.", clothing:[{c:"#8B4513",n:"Saddle Brown"},{c:"#4B0082",n:"Indigo"},{c:"#008B8B",n:"Dark Cyan"},{c:"#800000",n:"Maroon"},{c:"#2F4F4F",n:"Dark Slate"},{c:"#556B2F",n:"Dark Olive"}], makeup:[{c:"#6B4423",n:"Rich Neutral"},{c:"#7B3F00",n:"Deep Brown"},{c:"#5C4033",n:"Coffee"},{c:"#8B5A3C",n:"Warm Neutral"}], accessories:[{c:"#FFD700",n:"Gold"},{c:"#C0C0C0",n:"Silver"},{c:"#E5AA70",n:"Rose Gold"}], tips:["All metal tones complement your beautiful complexion","Rich, saturated colours across the full spectrum are stunning on you","Deep jewel tones celebrate your natural depth","You have the unique flexibility to wear the most diverse palettes","Bold, vibrant colours enhance your extraordinary richness"] }
+    };
+
+    // ─── DOM ───
+    const loginScreen = document.getElementById('loginScreen');
+    const mainApp = document.getElementById('mainApp');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const loginBtn = document.getElementById('loginBtn');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const imageUpload = document.getElementById('imageUpload');
+    const previewSection = document.getElementById('previewSection');
+    const resultsSection = document.getElementById('resultsSection');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const canvas = document.getElementById('imageCanvas');
+    const ctx = canvas.getContext('2d');
+    let currentImage = null;
+
+    // ─── AUTH ───
+    function setLoggedIn(v) {
+      loginScreen.style.display = v ? 'none' : 'flex';
+      mainApp.style.display = v ? 'block' : 'none';
+      logoutBtn.style.display = v ? 'inline-block' : 'none';
+      if (!v) { usernameInput.value = ''; passwordInput.value = ''; }
+    }
+
+    if (sessionStorage.getItem('loggedIn') === 'true') setLoggedIn(true); else setLoggedIn(false);
+
+    loginBtn.onclick = () => {
+      if (usernameInput.value.trim() && passwordInput.value.trim()) {
+        sessionStorage.setItem('loggedIn','true');
+        setLoggedIn(true);
+      } else {
+        usernameInput.style.borderColor = '#E74C3C';
+        setTimeout(() => usernameInput.style.borderColor = '', 1200);
+      }
+    };
+
+    passwordInput.addEventListener('keydown', e => { if (e.key === 'Enter') loginBtn.click(); });
+    logoutBtn.onclick = () => { sessionStorage.removeItem('loggedIn'); setLoggedIn(false); resetView(); };
+
+    // ─── UPLOAD ───
+    imageUpload.addEventListener('change', handleFile);
+
+    function handleFile(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const img = new Image();
+        img.onload = () => {
+          currentImage = img;
+          const maxW = 700;
+          const scale = Math.min(maxW / img.width, 1);
+          canvas.width = img.width * scale;
+          canvas.height = img.height * scale;
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          previewSection.style.display = 'block';
+          resultsSection.style.display = 'none';
+          previewSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    document.getElementById('cameraBtn').onclick = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const video = document.createElement('video');
+        video.srcObject = stream;
+        await video.play();
+        video.addEventListener('loadedmetadata', () => {
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          ctx.drawImage(video, 0, 0);
+          stream.getTracks().forEach(t => t.stop());
+          const img = new Image();
+          img.onload = () => { currentImage = img; previewSection.style.display = 'block'; resultsSection.style.display = 'none'; };
+          img.src = canvas.toDataURL();
+        });
+      } catch (err) { alert('Camera error: ' + err.message); }
+    };
+
+    resetBtn.onclick = resetView;
+    function resetView() {
+      previewSection.style.display = 'none';
+      resultsSection.style.display = 'none';
+      currentImage = null;
+      imageUpload.value = '';
+    }
+
+    // Drag-and-drop
+    const uploadZone = document.getElementById('uploadZone');
+    uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+    uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+    uploadZone.addEventListener('drop', e => {
+      e.preventDefault();
+      uploadZone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) { imageUpload.files = e.dataTransfer.files; handleFile({ target: imageUpload }); }
+    });
+
+    analyzeBtn.onclick = analyze;
+
+    // ─── ANALYSIS ───
+    function rgbToHsv(r,g,b){r/=255;g/=255;b/=255;const max=Math.max(r,g,b),min=Math.min(r,g,b),d=max-min;let h=0;if(d!==0){if(max===r)h=60*(((g-b)/d)%6);else if(max===g)h=60*((b-r)/d+2);else h=60*((r-g)/d+4);}if(h<0)h+=360;return{h,s:max===0?0:d/max,v:max};}
+    function rgbToLab(r,g,b){r/=255;g/=255;b/=255;r=r>0.04045?((r+0.055)/1.055)**2.4:r/12.92;g=g>0.04045?((g+0.055)/1.055)**2.4:g/12.92;b=b>0.04045?((b+0.055)/1.055)**2.4:b/12.92;let x=(r*0.4124+g*0.3576+b*0.1805)/0.95047;let y=(r*0.2126+g*0.7152+b*0.0722);let z=(r*0.0193+g*0.1192+b*0.9505)/1.08883;const f=v=>v>0.008856?v**(1/3):7.787*v+16/116;x=f(x);y=f(y);z=f(z);return{l:116*y-16,a:500*(x-y),b:200*(y-z)};}
+    function ita(l,b){const v=(Math.atan((l-50)/b)*180)/Math.PI;let cat;if(v>55)cat="Very Light";else if(v>41)cat="Light";else if(v>28)cat="Intermediate";else if(v>19)cat="Tan";else if(v>10)cat="Brown";else cat="Dark";return{v,cat};}
+    function fitzpatrick(l){if(l>75)return{t:"Type I",d:"Very fair — always burns"};if(l>65)return{t:"Type II",d:"Fair — usually burns"};if(l>55)return{t:"Type III",d:"Medium — sometimes burns"};if(l>45)return{t:"Type IV",d:"Olive — rarely burns"};if(l>35)return{t:"Type V",d:"Brown — very rarely burns"};return{t:"Type VI",d:"Dark — never burns"};}
+    function monkLevel(l){if(l>80)return 1;if(l>72)return 2;if(l>64)return 3;if(l>56)return 4;if(l>48)return 5;if(l>40)return 6;if(l>32)return 7;if(l>24)return 8;if(l>16)return 9;return 10;}
+    function isSkin(r,g,b){return r>95&&g>40&&b>20&&r>g&&r>b&&Math.abs(r-g)>15;}
+    function undertone(r,g,b){const rd=r-g,rb=r-b;if(rd>10&&rb>15)return"warm";if(rb<10&&b>g)return"cool";return"neutral";}
+    function depth(l){if(l>65)return"light";if(l>45)return"medium";return"deep";}
+
+    function analyze() {
+      if (!currentImage) return;
+      const d = ctx.getImageData(0,0,canvas.width,canvas.height).data;
+      const cx=canvas.width/2, cy=canvas.height/2, sr=Math.min(canvas.width,canvas.height)/4;
+      let rS=0,gS=0,bS=0,n=0;
+      for(let y=cy-sr;y<cy+sr;y++){
+        for(let x=cx-sr;x<cx+sr;x++){
+          if(x>=0&&x<canvas.width&&y>=0&&y<canvas.height&&(x-cx)**2+(y-cy)**2<=sr**2){
+            const i=(Math.floor(y)*canvas.width+Math.floor(x))*4;
+            const r=d[i],g=d[i+1],b=d[i+2];
+            if(isSkin(r,g,b)){rS+=r;gS+=g;bS+=b;n++;}
+          }
+        }
+      }
+      if(n===0){alert("No skin pixels detected in the sample area. Try a photo with clear skin in the center.");return;}
+      renderResults(Math.round(rS/n),Math.round(gS/n),Math.round(bS/n));
+    }
+
+    function renderResults(r,g,b) {
+      const hsv = rgbToHsv(r,g,b);
+      const lab = rgbToLab(r,g,b);
+      const itaR = ita(lab.l, lab.b);
+      const fitz = fitzpatrick(lab.l);
+      const monk = monkLevel(lab.l);
+      const ut = undertone(r,g,b);
+      const dp = depth(lab.l);
+      const recKey = `${ut}_${dp}`;
+      const rec = colorDB[recKey] || colorDB['neutral_medium'];
+
+      // color hero
+      document.getElementById('colorSwatchHero').style.backgroundColor = `rgb(${r},${g},${b})`;
+      document.getElementById('rgbValue').textContent = `${r}, ${g}, ${b}`;
+      document.getElementById('hsvValue').textContent = `${hsv.h.toFixed(0)}°, ${(hsv.s*100).toFixed(0)}%, ${(hsv.v*100).toFixed(0)}%`;
+      document.getElementById('labValue').textContent = `${lab.l.toFixed(1)}, ${lab.a.toFixed(1)}, ${lab.b.toFixed(1)}`;
+
+      // ITA
+      document.getElementById('itaValue').textContent = itaR.v.toFixed(1) + '°';
+      document.getElementById('itaCategory').textContent = itaR.cat;
+      const itaPct = Math.max(0, Math.min(100, ((itaR.v + 90) / 180) * 100));
+      document.getElementById('itaThumb').style.left = itaPct + '%';
+
+      // Fitzpatrick
+      document.getElementById('fitzType').textContent = fitz.t;
+      document.getElementById('fitzDesc').textContent = fitz.d;
+
+      // Monk
+      document.getElementById('monkType').textContent = `Level ${monk}`;
+      const monkRow = document.getElementById('monkRow');
+      monkRow.innerHTML = '';
+      monkColors.forEach((c, i) => {
+        const pip = document.createElement('div');
+        pip.className = 'monk-pip' + (i+1===monk?' active':'');
+        pip.style.background = c;
+        monkRow.appendChild(pip);
+      });
+
+      // Undertone
+      document.getElementById('undertonePill').textContent = rec.undertone + ' undertone';
+      document.getElementById('undertonePill').className = `undertone-pill ${rec.cls}`;
+      document.getElementById('undertoneDesc').textContent = rec.desc;
+
+      // Palettes
+      renderPalette('clothingPalette', rec.clothing);
+      renderPalette('makeupPalette', rec.makeup);
+      renderPalette('accessoryPalette', rec.accessories);
+
+      // Tips
+      const tl = document.getElementById('tipsList');
+      tl.innerHTML = '';
+      rec.tips.forEach(t => { const li = document.createElement('li'); li.textContent = t; tl.appendChild(li); });
+
+      // Shopping
+      renderShopping(recKey, fitz.t, rec);
+
+      // Show results
+      resultsSection.style.display = 'block';
+      // Restart animations
+      resultsSection.querySelectorAll('.anim-fade').forEach(el => {
+        el.style.animation = 'none';
+        el.offsetHeight;
+        el.style.animation = '';
+      });
+      resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function renderPalette(id, items) {
+      const el = document.getElementById(id);
+      el.innerHTML = '';
+      items.forEach(item => {
+        const wrap = document.createElement('div');
+        wrap.className = 'swatch-item';
+        const dot = document.createElement('div');
+        dot.className = 'swatch-dot';
+        dot.style.background = item.c;
+        const name = document.createElement('div');
+        name.className = 'swatch-name';
+        name.textContent = item.n;
+        wrap.appendChild(dot);
+        wrap.appendChild(name);
+        el.appendChild(wrap);
+      });
+    }
+
+    function renderShopping(key, fitzType, rec) {
+      const spf = fitzType.includes("I") || fitzType.includes("II") ? "SPF 50+" : fitzType.includes("III") || fitzType.includes("IV") ? "SPF 30–50" : "SPF 15–30";
+      const sunscreens = [
+        { e:"🧴", n:"Neutrogena Ultra Sheer", d:`${spf} · Lightweight formula`, l:"https://www.amazon.com/s?k=neutrogena+ultra+sheer+spf" },
+        { e:"☀️", n:"La Roche-Posay Anthelios", d:`${spf} · Melt-in milk texture`, l:"https://www.amazon.com/s?k=la+roche+posay+anthelios" },
+        { e:"🌿", n:"Supergoop! Play", d:`${spf} · Everyday protection`, l:"https://www.amazon.com/s?k=supergoop+play" }
+      ];
+      const sg = document.getElementById('sunscreenGrid');
+      sg.innerHTML = '';
+      sunscreens.forEach(p => sg.appendChild(mkProduct(p.e, p.n, p.d, p.l)));
+
+      const cg = document.getElementById('clothingGrid');
+      cg.innerHTML = '';
+      rec.clothing.slice(0,3).forEach(item => {
+        cg.appendChild(mkProduct("👗", `${item.n} Palette`, `Clothing in flattering ${item.n.toLowerCase()}`, `https://www.amazon.com/s?k=${encodeURIComponent(item.n + ' clothing')}`));
+      });
+    }
+
+    function mkProduct(emoji, name, desc, link) {
+      const card = document.createElement('div');
+      card.className = 'product-item';
+      card.innerHTML = `<div class="product-emoji">${emoji}</div><div class="product-name">${name}</div><div class="product-desc">${desc}</div><a class="btn-buy" href="${link}" target="_blank" rel="noopener">Shop</a>`;
+      return card;
+    }
+  })();
+  </script>
+</body>
+</html>
